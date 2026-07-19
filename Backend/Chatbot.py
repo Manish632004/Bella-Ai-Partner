@@ -2,6 +2,9 @@ from groq import Groq     #  Importing the Groq library to use its API.
 from json import load, dump    # Importing functions to read and write JSON files.
 import datetime    # Importing the datetime module for real-time date and time information.
 from dotenv import dotenv_values    # Importing dotenv_values to read environment variables from a .env file.
+from Backend.Memory import get_all_facts, extract_facts_async
+import cohere
+import requests
 
 # Load environment variables from the .env file.
 env_vars= dotenv_values(".env")
@@ -10,12 +13,66 @@ env_vars= dotenv_values(".env")
 Username = env_vars.get("Username")
 Assistantname = env_vars.get("Assistantname")
 GroqAPIKey = env_vars.get("GroqAPIKey")
+CohereAPIKey = env_vars.get("CohereAPIKey")
 
 # Initialize the Groq client using the provided API key.
 client = Groq (api_key=GroqAPIKey)
 
 # Initialize an empty list to store chat messages.
 messages = [ ]
+
+def call_cohere_chat(messages, system_prompt, query):
+    try:
+        co = cohere.Client(api_key=CohereAPIKey)
+        cohere_history = []
+        for msg in messages[:-1]:
+            role = "USER" if msg["role"] == "user" else "CHATBOT"
+            if msg["role"] == "system":
+                continue
+            cohere_history.append({"role": role, "message": msg["content"]})
+            
+        response = co.chat(
+            model="command-r-plus-08-2024",
+            message=query,
+            preamble=system_prompt,
+            chat_history=cohere_history,
+            temperature=0.7
+        )
+        return response.text
+    except Exception as e:
+        print(f"Error in Cohere Fallback: {e}")
+        return None
+
+def call_ollama_chat(messages, system_prompt):
+    url = "http://localhost:11434/v1/chat/completions"
+    formatted_messages = [{"role": "system", "content": system_prompt}] + messages
+    payload = {
+        "model": "llama3",
+        "messages": formatted_messages,
+        "temperature": 0.7,
+        "max_tokens": 1024
+    }
+    try:
+        response = requests.post(url, json=payload, timeout=5)
+        if response.status_code == 200:
+            data = response.json()
+            return data["choices"][0]["message"]["content"]
+    except Exception:
+        pass
+    return None
+
+def call_offline_fallback(query):
+    query_lower = query.lower()
+    if "time" in query_lower:
+        return f"Offline Fallback: The current local time is {datetime.datetime.now().strftime('%I:%M %p')}."
+    elif "date" in query_lower:
+        return f"Offline Fallback: Today is {datetime.datetime.now().strftime('%B %d, %Y')}."
+    elif "hello" in query_lower or "hi" in query_lower:
+        return "Offline Fallback: Hello! I am running in offline backup mode."
+    elif "who are you" in query_lower or "your name" in query_lower:
+        return f"Offline Fallback: I am your AI assistant, {Assistantname}."
+    return "Offline Fallback: I am currently unable to contact the cloud APIs, and I don't have this information saved locally."
+
 
 # Define a system message that provides context to the AI chatbot about its role and behavior.
 System = f"""Hello, I am {Username}, You are a very accurate and advanced AI chatbot named {Assistantname} which also has real-time up-to-date information from the internet.
@@ -73,40 +130,62 @@ def ChatBot(Query):
         # Append the user's query to the messages list. I
         messages.append({"role": "user", "content": f"{Query}"})
         
-        # Make a request to the Groq API for a response.
-        completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile", # Specify the AI model to use.
-        messages=SystemChatBot + [{"role": "system", "content": RealtimeInformation()}] + messages, # Include system instructions, real-time info,
-        max_tokens=1024, # Limit the maximum tokens in the response.
-        temperature=0.7, # Adjust response randomness (higher means more random).
-        top_p=1, # Use nucleus sampling to control diversity.
-        stream=True, # Enable streaming response.
-        stop=None # Allow the model to determine when to stop.
-        )
-
-
-        Answer = ""# Initialize an empty string to store the AI's response.
-
-        # Process the streamed response chunks.
-        for chunk in completion:
-             if chunk.choices[0].delta.content: # Check if there's content in the current chunk.
-                Answer += chunk.choices[0].delta.content # Append the content to the answer.
-        Answer = Answer.replace("</s>", "") # Clean up any unwanted tokens from the response.
+        # Load long term facts dynamically and append to system instructions
+        facts = get_all_facts()
+        dynamic_system = System + facts
+        current_system_messages = [{"role": "system", "content": dynamic_system}]
+        
+        Answer = None
+        
+        # 1. Try Groq (Primary Cloud Model)
+        try:
+            completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile", # Specify the AI model to use.
+            messages=current_system_messages + [{"role": "system", "content": RealtimeInformation()}] + messages, # Include system instructions, real-time info,
+            max_tokens=1024, # Limit the maximum tokens in the response.
+            temperature=0.7, # Adjust response randomness (higher means more random).
+            top_p=1, # Use nucleus sampling to control diversity.
+            stream=True, # Enable streaming response.
+            stop=None # Allow the model to determine when to stop.
+            )
+            
+            Answer = ""
+            # Process the streamed response chunks.
+            for chunk in completion:
+                 if chunk.choices[0].delta.content: # Check if there's content in the current chunk.
+                    Answer += chunk.choices[0].delta.content # Append the content to the answer.
+            Answer = Answer.replace("</s>", "") # Clean up any unwanted tokens from the response.
+        except Exception as groq_err:
+            print(f"Primary Groq model failed: {groq_err}. Trying fallbacks...")
+            
+            # 2. Try Local Ollama (Local offline model)
+            Answer = call_ollama_chat(messages, dynamic_system + "\n" + RealtimeInformation())
+            
+            if Answer is None:
+                # 3. Try Cohere (Secondary Cloud Model)
+                Answer = call_cohere_chat(messages, dynamic_system + "\n" + RealtimeInformation(), Query)
+                
+            if Answer is None:
+                # 4. Try Offline Local Rules
+                Answer = call_offline_fallback(Query)
+        
         # Append the chatbot's response to the messages list.
         messages.append({"role": "assistant", "content": Answer})
         # Save the updated chat log to the JSON file.
         with open(r"Data\ChatLog.json", "w") as f:
             dump(messages, f, indent=4)
+        # Trigger asynchronous fact extraction to save details permanently
+        extract_facts_async(Query, Answer)
 
         # Return the formatted response.
         return AnswerModifier (Answer=Answer)
 
     except Exception as e:
         # Handle errors by printing the exception and resetting the chat log.
-        print("Error: {e}")
+        print(f"Error in ChatBot: {e}")
         with open(r"Data\ChatLog.json", "w") as f:
             dump([], f, indent=4)
-        return ChatBot(Query) # Retry the query after resetting the log.
+        return f"Sorry, I encountered an error: {e}"
 
 #Main program entry point.
 if __name__ == "__main__":

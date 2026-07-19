@@ -17,6 +17,8 @@ from Backend.SpeechToText import SpeechRecognition
 from Backend.Chatbot import ChatBot
 from Backend.TextToSpeech import TextToSpeech
 from Backend.FileTools import find_file, read_file, list_directory, debug_code
+from Backend.Reminders import start_reminder_scheduler, add_reminder, list_reminders, delete_reminder
+from Backend.Memory import remember_fact, recall_fact
 from dotenv import dotenv_values
 from asyncio import run
 from time import sleep
@@ -77,6 +79,7 @@ def InitialExecution():
         ShowDefaultChatIfNoChats()
         ChatLogIntegration()
         ShowChatsOnGUI()
+        start_reminder_scheduler()
 InitialExecution()
 def MainExecution():
         TaskExecution = False
@@ -138,6 +141,75 @@ def MainExecution():
                         SetAssistantStatus("Searching...")
                         QueryFinal = Queries.replace("realtime ","")
                         Answer = RealtimeSearchEngine (QueryModifier (QueryFinal))
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "set a reminder" in Queries:
+                        SetAssistantStatus("Setting reminder...")
+                        QueryFinal = Queries.replace("set a reminder", "").strip()
+                        if " | " in QueryFinal:
+                            time_part, message_part = QueryFinal.split(" | ", 1)
+                            time_part = time_part.strip()
+                            message_part = message_part.strip()
+                        else:
+                            time_part = "5 minutes"
+                            message_part = QueryFinal
+                        result = add_reminder(message_part, time_part)
+                        prompt = f"The user requested to set a reminder. The system execution result is: '{result}'. Formulate a natural voice confirmation to the user."
+                        Answer = ChatBot(prompt)
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "list my reminders" in Queries:
+                        SetAssistantStatus("Listing reminders...")
+                        result = list_reminders()
+                        prompt = f"The user asked to list their reminders. The system data is:\n{result}\nFormulate a natural response presenting this list to the user."
+                        Answer = ChatBot(prompt)
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "cancel a reminder" in Queries:
+                        import re
+                        SetAssistantStatus("Canceling reminder...")
+                        QueryFinal = Queries.replace("cancel a reminder", "").strip()
+                        id_match = re.search(r"\d+", QueryFinal)
+                        if id_match:
+                            rid = int(id_match.group(0))
+                            result = delete_reminder(rid)
+                        else:
+                            result = "Could not find a valid reminder ID in the request."
+                        prompt = f"The user requested to cancel a reminder. The cancellation outcome is: '{result}'. Formulate a natural response confirming the deletion or failure."
+                        Answer = ChatBot(prompt)
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "remember fact" in Queries:
+                        SetAssistantStatus("Remembering fact...")
+                        QueryFinal = Queries.replace("remember fact", "").strip()
+                        if " | " in QueryFinal:
+                            key_part, value_part = QueryFinal.split(" | ", 1)
+                            key_part = key_part.strip()
+                            value_part = value_part.strip()
+                        else:
+                            key_part = "unknown"
+                            value_part = QueryFinal
+                        result = remember_fact(key_part, value_part)
+                        prompt = f"The user asked to remember a fact. The memory system response is: '{result}'. Formulate a natural voice confirmation to the user."
+                        Answer = ChatBot(prompt)
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "recall fact" in Queries:
+                        SetAssistantStatus("Recalling fact...")
+                        QueryFinal = Queries.replace("recall fact", "").strip()
+                        result = recall_fact(QueryFinal)
+                        prompt = f"The user asked to recall a fact for key '{QueryFinal}'. The memory lookup result is: '{result}'. Formulate a natural voice response presenting the fact."
+                        Answer = ChatBot(prompt)
                         ShowTextToScreen(f" {Assistantname} : {Answer}")
                         SetAssistantStatus("Answering...")
                         TextToSpeech(Answer)

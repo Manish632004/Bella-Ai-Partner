@@ -11,8 +11,9 @@ co = cohere.Client (api_key=CohereAPIKey)
 funcs = [
 "exit", "general", "realtime", "open", "close", "play",
 "generate image", "system", "content", "google search",
-"youtube search", "reminder", "find file", "read file",
-"list files", "debug code"
+"youtube search", "set a reminder", "list my reminders",
+"cancel a reminder", "remember fact", "recall fact",
+"find file", "read file", "list files", "debug code"
 ]
 # Initialize an empty list to store user messages.
 messages = []
@@ -27,7 +28,11 @@ You will decide whether a query is a 'general' query, a 'realtime' query, or is 
 -> Respond with 'close (application name)' if a query is asking to close any application like 'close notepad', 'close facebook', etc. but if the query is asking to close multiple applications or websites, respond with 'close 1st application name, close 2nd application name' and so on.
 -> Respond with 'play (song name)' if a query is asking to play any song like 'play afsanay by ys', 'play let her go', etc. but if the query is asking to play multiple songs, respond with 'play 1st song name, play 2nd song name' and so on.
 -> Respond with 'generate image (image prompt)' if a query is requesting to generate a image with given prompt like 'generate image of a lion', 'generate image of a cat', etc. but if the query is asking to generate multiple images, respond with 'generate image 1st image prompt, generate image 2nd image prompt' and so on.
--> Respond with 'reminder (datetime with message)' if a query is requesting to set a reminder like 'set a reminder at 9:00pm on 25th june for my business meeting.' respond with 'reminder 9:00pm 25th june business meeting'.
+-> Respond with 'set a reminder (time | message)' if a query is requesting to set a reminder. E.g., 'remind me to check the oven in 10 minutes' should respond with 'set a reminder 10 minutes | check the oven', and 'set a reminder at 9:00pm to call John' should respond with 'set a reminder 9:00pm | call John'.
+-> Respond with 'list my reminders' if a query is asking to show or list active reminders. E.g., 'what reminders do I have?' -> 'list my reminders'.
+-> Respond with 'cancel a reminder (id)' if a query is asking to cancel or delete a reminder. E.g., 'cancel reminder 3' or 'delete reminder number 3' should respond with 'cancel a reminder 3'.
+-> Respond with 'remember fact (key | value)' if a query wants the assistant to remember a specific long-term fact or preference about the user. E.g., 'remember that my favorite food is sushi' -> 'remember fact favorite food | sushi', 'remember that I prefer dark mode' -> 'remember fact prefers dark mode | true'.
+-> Respond with 'recall fact (key)' if a query is explicitly asking what the assistant remembers about a specific fact. E.g., 'what is my favorite food?' -> 'recall fact favorite food', 'do you remember my home address?' -> 'recall fact home address'.
 -> Respond with 'system (task name)' if a query is asking to mute, unmute, volume up, volume down , etc. but if the query is asking to do multiple tasks, respond with 'system 1st task, system 2nd task', etc.
 -> Respond with 'content (topic)' if a query is asking to write any type of content like application, codes, emails or anything else about a specific topic but if the query is asking to write multiple types of content, respond with 'content 1st topic, content 2nd topic' and so on.
 -> Respond with 'google search (topic)' if a query is asking to search a specific topic on google but if the query is asking to search multiple topics on google, respond with 'google search 1st topic, google search 2nd topic' and so on.
@@ -51,9 +56,19 @@ ChatHistory = [
 {"role": "User", "message": "open chrome and firefox"},
 {"role": "Chatbot", "message": "open chrome, open firefox"},
 {"role": "User", "message": "what is today's date and by the way remind me that i have a dancing performance on"},
-{"role": "Chatbot", "message": "general what is today's date, reminder 11:00pm 5th aug dancing performance"},
+{"role": "Chatbot", "message": "general what is today's date, set a reminder 11:00pm | dancing performance"},
 {"role": "User", "message": "chat with me."},
 {"role": "Chatbot", "message": "general chat with me."},
+{"role": "User", "message": "remind me to check the oven in 10 minutes"},
+{"role": "Chatbot", "message": "set a reminder 10 minutes | check the oven"},
+{"role": "User", "message": "what reminders do I have active?"},
+{"role": "Chatbot", "message": "list my reminders"},
+{"role": "User", "message": "cancel reminder 4"},
+{"role": "Chatbot", "message": "cancel a reminder 4"},
+{"role": "User", "message": "remember that my favorite food is pizza"},
+{"role": "Chatbot", "message": "remember fact favorite food | pizza"},
+{"role": "User", "message": "what is my favorite food?"},
+{"role": "Chatbot", "message": "recall fact favorite food"},
 {"role": "User", "message": "find the file named automation in Backend"},
 {"role": "Chatbot", "message": "find file automation | Backend"},
 {"role": "User", "message": "show me the contents of main.py"},

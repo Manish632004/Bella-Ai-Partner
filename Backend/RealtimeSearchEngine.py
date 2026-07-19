@@ -3,6 +3,10 @@ from groq import Groq # Importing the Groq library to use its API.
 from json import load, dump # Importing functions to read and write JSON files.
 import datetime # Importing the datetime module for real-time date and time information.
 from dotenv import dotenv_values # Importing dotenv_values to read environment variables from a .env file.
+from Backend.Memory import get_all_facts, extract_facts_async
+from Backend.Chatbot import call_cohere_chat, call_ollama_chat, call_offline_fallback
+
+
 
 #Load environment variables from the env file.
 
@@ -80,41 +84,65 @@ def Information():
 
 #Function to handle real-time search and response generation.
 def RealtimeSearchEngine (prompt):
-    global SystemChatBot, messages
+    global messages
     #Load the chat log from the JSON file.
     with open(r"Data\ChatLog.json", "r") as f:
         messages = load(f)
     messages.append({"role": "user", "content": f"{prompt}"})
 
-    #Add Google search results to the system chatbot messages.
-    SystemChatBot.append({"role": "system", "content": GoogleSearch(prompt)})
+    # Reconstruct dynamic system prompt with long term facts
+    facts = get_all_facts()
+    dynamic_system = System + facts
+    google_results = GoogleSearch(prompt)
+    local_system_chatbot = [
+        {"role": "system", "content": dynamic_system},
+        {"role": "user", "content": "Hi"},
+        {"role": "assistant", "content": "Hello, how can I help you?"},
+        {"role": "system", "content": google_results}
+    ]
 
-    #Generate a response using the Groq client.
-    completion = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
-        messages=SystemChatBot + [{"role": "system", "content": Information()}] + messages,
-        temperature=0.7,
-        max_tokens=2048,
-        stream=True,
-        stop=None
-    )
-    Answer = ""
+    try:
+        # 1. Try Groq
+        completion = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=local_system_chatbot + [{"role": "system", "content": Information()}] + messages,
+            temperature=0.7,
+            max_tokens=2048,
+            stream=True,
+            stop=None
+        )
+        Answer = ""
+        # Concatenate response chunks from the streaming output.
+        for chunk in completion:
+            if chunk.choices[0].delta.content:
+                Answer += chunk.choices[0].delta.content
+        Answer = Answer.strip().replace("</s>", "")
+    except Exception as groq_err:
+        print(f"RealtimeSearchEngine Groq model failed: {groq_err}. Trying fallbacks...")
+        
+        # Combine instructions and search results for fallback preamble
+        combined_system = dynamic_system + "\n" + Information() + "\n" + google_results
+        
+        # 2. Try Local Ollama
+        Answer = call_ollama_chat(messages, combined_system)
+        
+        if Answer is None:
+            # 3. Try Cohere
+            Answer = call_cohere_chat(messages, combined_system, prompt)
+            
+        if Answer is None:
+            # 4. Try Offline Local Rules
+            Answer = call_offline_fallback(prompt)
 
-    # Concatenate response chunks from the streaming output.
-    for chunk in completion:
-        if chunk.choices[0].delta.content:
-            Answer += chunk.choices[0].delta.content
-
-    #Clean up the response.
-    Answer = Answer.strip().replace("</s>", "")
     messages.append({"role": "assistant", "content": Answer})
+
+    # Trigger asynchronous fact extraction to save details permanently
+    extract_facts_async(prompt, Answer)
 
     #Save the updated chat log back to the JSON file.
     with open(r"Data\ChatLog.json", "w") as f:
         dump(messages, f, indent=4)
 
-    # Remove the most recent system message from the chatbot conversation.
-    SystemChatBot.pop()
     return AnswerModifier (Answer=Answer)
 # Main entry point of the program for interactive querying.
 if __name__ == "__main__":

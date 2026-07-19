@@ -1,77 +1,65 @@
-Manish : What's your name?
-Bella : My name is Bella.
-Manish : The user asked to list the contents of the folder 'Backend'. Here is the directory listing:
-Contents of directory 'E:\Projects\Bella\Backend':
-Directories:
-  - [DIR] __pycache__
-Files:
-  - [FILE] Automation.py
-  - [FILE] Chatbot.py
-  - [FILE] FileTools.py
-  - [FILE] ImageGeneration.py
-  - [FILE] Model.py
-  - [FILE] RealtimeSearchEngine.py
-  - [FILE] SpeechToText.py
-  - [FILE] TextToSpeech.py
-Formulate a natural response summarizing the contents.
-Bella : The 'Backend' folder contains several Python files, including Automation, Chatbot, and SpeechToText, as well as a few others like ImageGeneration and RealtimeSearchEngine. It also has a subdirectory called __pycache__.
-Manish : The user asked to find files matching 'manish resume' in path '.'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'manish resume' were found in the current directory.
-Manish : The user asked to find files matching 'Girl' in path 'D:\'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'Girl' were found on the D: drive.
-Manish : The user asked to find files matching 'manish resume' in path 'user'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'manish resume' were found in the 'user' directory.
+Manish : What did I tell you about my preferred theme?
+Bella : Offline Fallback: I am currently unable to contact the cloud APIs, and I don't have this information saved locally.
+Manish : The user asked to list their reminders. The system data is:
+You have no active reminders.
+Formulate a natural response presenting this list to the user.
+Bella : Offline Fallback: Hello! I am running in offline backup mode.
+Manish : What do you know about me?
+Bella : Offline Fallback: I am currently unable to contact the cloud APIs, and I don't have this information saved locally.
+Manish : The user asked to list their reminders. The system data is:
+You have no active reminders.
+Formulate a natural response presenting this list to the user.
+Bella : Offline Fallback: Hello! I am running in offline backup mode.
+Manish : What did I tell you about my preferred theme?
+Bella : You prefer the dark mode theme.
+Manish : What i can do home right now?
+Bella : There are plenty of activities you can do at home, here are a few ideas:
+- Catch up on your favorite TV shows or discover new ones.
+- Read a book or listen to an audiobook.
+- Try out a new recipe or cook a favorite meal.
+- Meditate or practice yoga.
+- Play video games or board games.
+- Learn a new skill or take an online course.
+- Organize your space or tackle a DIY project.
+- Listen to music or create a new playlist.
+- Connect with friends and family online.
+The options are endless, and you can always find something enjoyable to do at home!
 Manish : ..
-Bella : No files matching 'manish resume' were found.
-Manish : The user asked to find files matching 'money resume' in path '.'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'money resume' were found in the current directory.
+Bella : I apologize, I didn't quite understand your request. Can you please clarify your question or provide more details? I'd be happy to assist you if you can elaborate further.
+Manish : The user asked to list their reminders. The system data is:
+You have no active reminders.
+Formulate a natural response presenting this list to the user.
+Bella : You currently have no active reminders. Your list is empty, and there are no upcoming tasks or events to display. Enjoy your free time!
 Manish : ..
-Bella : No matching files were found.
-Manish : The user asked to find files matching 'manish resume' in path 'shared volume d'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'manish resume' were found on the 'shared volume d'.
-Manish : The user asked to find files matching 'yoga' in path '.'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'yoga' were found in the current directory.
+Bella : I'm sorry, I didn't understand your request. Is there something specific you'd like to know or do?
 Manish : ..
-Bella : No matching files were found.
-Manish : What you can do for me?
-Bella : I can provide information, answer questions, and assist with tasks to the best of my abilities.
-Manish : Can you improve your court yourself?
-Bella : I can learn and improve from the conversations I have with users like you.
-Manish : What kind and of information do you have about me?
-Bella : I don't have any personal information about you, except that your name is Manish and you are interacting with me.
-Manish : Can you stored information in the memory for the picture conversation and future task like what's my address what i to what i am doing right now and what kind of studies i am pursing?
-Bella : No, I don't have the ability to store personal information about you, such as your address, current activities, or studies. I'm a conversational AI, and our conversation is limited to this session only. Once our conversation ends, I won't retain any information about you.
-Manish : !.
-Bella : I'm here to help with any questions or topics you'd like to discuss.
-Manish : !.
-Bella : It seems like you're not asking a question. Is there something I can help you with?
-Manish : The user asked to find files matching 'manish resume 2026' in path '/'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'manish resume 2026' were found on the system.
-Manish : The user asked to find files matching 'manish ajeeb hai' in path '.'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'manish ajeeb hai' were found in the current directory.
-Manish : The user asked to find files matching 'money is you man' in path '.'. Here is the list of matches found on the system:
-[]
-Formulate a natural response informing the user about the results.
-Bella : No files matching 'money is you man' were found in the current directory.
-Manish : How many language do you support?
-Bella : I support English, and I respond in English regardless of the language used in the question.
+Bella : I'm here to assist you, but I need a bit more context to provide a meaningful response. Would you like me to suggest some activities or help you with something else?
 Manish : ..
-Bella : I only respond in English.
-Manish : How much decibel of sound you can hear?
-Bella : I don't have the ability to hear sounds or measure decibels, as I'm a text-based AI assistant.
+Bella : I understand you may be looking for something specific, but please provide additional details or a different prompt to ensure I can assist you effectively.
+Manish : The user requested to set a reminder. The system execution result is: 'Reminder successfully set for 2026-07-19 14:34:00: 'drinking water at 12''. Formulate a natural voice confirmation to the user.
+Bella : Reminder set! You will be reminded to drink water at 12 today.
+Manish : The user requested to cancel a reminder. The cancellation outcome is: 'Successfully deleted reminder ID 1: 'drink water'.'. Formulate a natural response confirming the deletion or failure.
+Bella : The reminder to drink water has been successfully deleted. You won't be notified about this task.
+Manish : The user requested to set a reminder. The system execution result is: 'Reminder successfully set for 2026-07-19 09:09:19: 'drinking water''. Formulate a natural voice confirmation to the user.
+Bella : Reminder set! You will be reminded to drink water today at 9:09 AM. Stay hydrated!
+Manish : The user asked to find files matching 'manish manish' in path '.'. Here is the list of matches found on the system:
+['[FILE] E:\\Projects\\Bella\\Data\\hiiammanishkumar.txt', '[FILE] E:\\Projects\\Bella\\Data\\iammanishiamfromiwillsendyoucompletedmybtechfromcomedyandcollegeperson..txt']
+Formulate a natural response informing the user about the results.
+Bella : I found two files that match your search:
+1. **hiiammanishkumar.txt**
+2. **iammanishiamfromiwillsendyoucompletedmybtechfromcomedyandcollegeperson..txt**
+These files are located in the 'E:\Projects\Bella\Data\' directory.
+Manish : ..
+Bella : I'm here to assist you with any further searches or actions related to file management. Would you like to refine your search or perform another operation?
+Manish : ..
+Bella : Please provide additional instructions or a different query to continue. I can assist with various tasks, but I need your input to proceed.
+Manish : ..
+Bella : I'm waiting for your input to assist you further. Feel free to ask any questions or provide new instructions.
+Manish : ..
+Bella : To ensure I can help you effectively, please provide a clear instruction or question. I'm ready to assist with any file-related tasks or general queries.
+Manish : ?.
+Bella : I'm afraid I don't have a response for this input. Can you provide more details or a different request?
+Manish : My name is Manish Kumar and I live in Bharatpur. I am pursuing computer science engineering studies.
+Bella : Thank you for sharing these details, Manish Kumar! I've noted your name and background information. If you have any questions related to computer science or engineering, feel free to ask, and I'll provide relevant assistance.
+Manish : Do you remember my name and what I am studying?
+Bella : Your name is Manish Kumar, and you are studying Computer Science Engineering.
