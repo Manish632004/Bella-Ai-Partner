@@ -11,7 +11,8 @@ co = cohere.Client (api_key=CohereAPIKey)
 funcs = [
 "exit", "general", "realtime", "open", "close", "play",
 "generate image", "system", "content", "google search",
-"youtube search", "reminder"
+"youtube search", "reminder", "find file", "read file",
+"list files", "debug code"
 ]
 # Initialize an empty list to store user messages.
 messages = []
@@ -31,6 +32,10 @@ You will decide whether a query is a 'general' query, a 'realtime' query, or is 
 -> Respond with 'content (topic)' if a query is asking to write any type of content like application, codes, emails or anything else about a specific topic but if the query is asking to write multiple types of content, respond with 'content 1st topic, content 2nd topic' and so on.
 -> Respond with 'google search (topic)' if a query is asking to search a specific topic on google but if the query is asking to search multiple topics on google, respond with 'google search 1st topic, google search 2nd topic' and so on.
 -> Respond with 'youtube search (topic)' if a query is asking to search a specific topic on youtube but if the query is asking to search multiple topics on youtube, respond with 'youtube search 1st topic, youtube search 2nd topic' and so on.
+-> Respond with 'find file (file_name | search_path)' if a query is asking to find or search for files matching a name or pattern on the computer. E.g., 'find main.py' should respond with 'find file main.py | .', and 'search for test.py in Backend' should respond with 'find file test.py | Backend'.
+-> Respond with 'read file (file_path)' if a query is asking to read, view, or print the contents of a file. E.g., 'read file Backend/Model.py' should respond with 'read file Backend/Model.py', and 'show me what is inside main.py' should respond with 'read file main.py'.
+-> Respond with 'list files (folder_path)' if a query is asking to list contents of a folder or directory. E.g., 'list files in Backend' should respond with 'list files Backend', and 'show directory contents' should respond with 'list files .'.
+-> Respond with 'debug code (file_path | error_message)' if a query is asking to debug a file or check it for errors. E.g., 'debug main.py' should respond with 'debug code main.py | None', and 'debug Backend/Model.py with error connection refused' should respond with 'debug code Backend/Model.py | connection refused'.
 *** If the query is asking to perform multiple tasks like 'open facebook, telegram and close whatsapp' respond with 'open facebook, open telegram, close whatsapp' ***
 *** If the user is saying goodbye or wants to end the conversation like 'bye jarvis.' respond with 'exit'.***
 *** Respond with 'general (query)' if you can't decide the kind of query or if a query is asking to perform a task which is not mentioned above. ***
@@ -48,7 +53,15 @@ ChatHistory = [
 {"role": "User", "message": "what is today's date and by the way remind me that i have a dancing performance on"},
 {"role": "Chatbot", "message": "general what is today's date, reminder 11:00pm 5th aug dancing performance"},
 {"role": "User", "message": "chat with me."},
-{"role": "Chatbot", "message": "general chat with me."}
+{"role": "Chatbot", "message": "general chat with me."},
+{"role": "User", "message": "find the file named automation in Backend"},
+{"role": "Chatbot", "message": "find file automation | Backend"},
+{"role": "User", "message": "show me the contents of main.py"},
+{"role": "Chatbot", "message": "read file main.py"},
+{"role": "User", "message": "list the files in the Frontend directory"},
+{"role": "Chatbot", "message": "list files Frontend"},
+{"role": "User", "message": "debug the file Backend/Model.py with error connection refused"},
+{"role": "Chatbot", "message": "debug code Backend/Model.py | connection refused"}
 ]
 
 # Define the main function for decision-making on queries.

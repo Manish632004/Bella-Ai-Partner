@@ -16,6 +16,7 @@ from Backend.Automation import Automation
 from Backend.SpeechToText import SpeechRecognition
 from Backend.Chatbot import ChatBot
 from Backend.TextToSpeech import TextToSpeech
+from Backend.FileTools import find_file, read_file, list_directory, debug_code
 from dotenv import dotenv_values
 from asyncio import run
 from time import sleep
@@ -137,6 +138,62 @@ def MainExecution():
                         SetAssistantStatus("Searching...")
                         QueryFinal = Queries.replace("realtime ","")
                         Answer = RealtimeSearchEngine (QueryModifier (QueryFinal))
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "find file" in Queries:
+                        SetAssistantStatus("Searching files...")
+                        QueryFinal = Queries.replace("find file", "").strip()
+                        if " | " in QueryFinal:
+                            name, search_path = QueryFinal.split(" | ", 1)
+                            name = name.strip()
+                            search_path = search_path.strip()
+                        else:
+                            name = QueryFinal
+                            search_path = "."
+                        result = find_file(name, search_path)
+                        prompt = f"The user asked to find files matching '{name}' in path '{search_path}'. Here is the list of matches found on the system:\n{result}\nFormulate a natural response informing the user about the results."
+                        Answer = ChatBot(prompt)
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "read file" in Queries:
+                        SetAssistantStatus("Reading file...")
+                        QueryFinal = Queries.replace("read file", "").strip()
+                        result = read_file(QueryFinal)
+                        prompt = f"The user asked to read the file '{QueryFinal}'. Here are the contents of that file:\n```\n{result}\n```\nFormulate a natural response presenting the file content or summarizing it as appropriate."
+                        Answer = ChatBot(prompt)
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "list files" in Queries:
+                        SetAssistantStatus("Listing folder...")
+                        QueryFinal = Queries.replace("list files", "").strip()
+                        result = list_directory(QueryFinal if QueryFinal else ".")
+                        prompt = f"The user asked to list the contents of the folder '{QueryFinal}'. Here is the directory listing:\n{result}\nFormulate a natural response summarizing the contents."
+                        Answer = ChatBot(prompt)
+                        ShowTextToScreen(f" {Assistantname} : {Answer}")
+                        SetAssistantStatus("Answering...")
+                        TextToSpeech(Answer)
+                        return True
+                    elif "debug code" in Queries:
+                        SetAssistantStatus("Debugging code...")
+                        QueryFinal = Queries.replace("debug code", "").strip()
+                        if " | " in QueryFinal:
+                            file_path, error_message = QueryFinal.split(" | ", 1)
+                            file_path = file_path.strip()
+                            error_message = error_message.strip()
+                            if error_message.lower() == "none":
+                                error_message = None
+                        else:
+                            file_path = QueryFinal
+                            error_message = None
+                        result = debug_code(file_path, error_message)
+                        prompt = f"The user asked to debug the file '{file_path}' with error: '{error_message}'. Here is the debugging output from the analysis engine:\n{result}\nFormulate a natural response presenting the debugging analysis and the suggested fix."
+                        Answer = ChatBot(prompt)
                         ShowTextToScreen(f" {Assistantname} : {Answer}")
                         SetAssistantStatus("Answering...")
                         TextToSpeech(Answer)
