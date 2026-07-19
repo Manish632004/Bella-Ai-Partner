@@ -44,6 +44,14 @@ def call_cohere_chat(messages, system_prompt, query):
         return None
 
 def call_ollama_chat(messages, system_prompt):
+    import socket
+    try:
+        # Fast socket check to see if Ollama port is open (avoiding 5s timeout)
+        with socket.create_connection(("localhost", 11434), timeout=0.1):
+            pass
+    except Exception:
+        return None
+
     url = "http://localhost:11434/v1/chat/completions"
     formatted_messages = [{"role": "system", "content": system_prompt}] + messages
     payload = {

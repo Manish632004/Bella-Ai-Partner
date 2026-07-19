@@ -19,8 +19,10 @@ def init_db():
     conn.commit()
     conn.close()
 
+# Initialize DB on load
+init_db()
+
 def remember_fact(key, value):
-    init_db()
     # Normalize key (convert to lowercase and replace spaces with underscores)
     normalized_key = key.strip().lower().replace(" ", "_")
     conn = sqlite3.connect(DB_PATH, timeout=20)
@@ -34,7 +36,6 @@ def remember_fact(key, value):
     return f"I have committed this to my long-term memory: {normalized_key} is {value.strip()}."
 
 def recall_fact(key):
-    init_db()
     normalized_key = key.strip().lower().replace(" ", "_")
     conn = sqlite3.connect(DB_PATH, timeout=20)
     cursor = conn.cursor()
@@ -46,7 +47,6 @@ def recall_fact(key):
     return f"I could not find any long-term memory about '{normalized_key}'."
 
 def get_all_facts():
-    init_db()
     conn = sqlite3.connect(DB_PATH, timeout=20)
     cursor = conn.cursor()
     try:

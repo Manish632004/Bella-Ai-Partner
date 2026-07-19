@@ -63,3 +63,14 @@ Manish : My name is Manish Kumar and I live in Bharatpur. I am pursuing computer
 Bella : Thank you for sharing these details, Manish Kumar! I've noted your name and background information. If you have any questions related to computer science or engineering, feel free to ask, and I'll provide relevant assistance.
 Manish : Do you remember my name and what I am studying?
 Bella : Your name is Manish Kumar, and you are studying Computer Science Engineering.
+Manish : The user asked to list their reminders. The system data is:
+Active Reminders:
+ID: 6 | Time: 2026-07-19 14:34:00 | Task: drinking water at 12
+Formulate a natural response presenting this list to the user.
+Bella : You have one active reminder:
+- Drinking water at 12 today.
+Is there anything else I can assist you with regarding your reminders?
+Manish : Who i am what i am studying?
+Bella : You are Manish Kumar, and you are currently studying Computer Science Engineering.
+Manish : What did I tell you about my preferred theme?
+Bella : You prefer the dark mode theme.

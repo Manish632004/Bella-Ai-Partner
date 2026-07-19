@@ -30,6 +30,9 @@ def init_db():
     conn.commit()
     conn.close()
 
+# Initialize DB on load
+init_db()
+
 def parse_time(time_str):
     time_str = time_str.lower().strip()
     
@@ -65,7 +68,6 @@ def parse_time(time_str):
     return (datetime.datetime.now() + datetime.timedelta(minutes=5)).strftime("%Y-%m-%d %H:%M:%S")
 
 def add_reminder(text, time_str):
-    init_db()
     parsed_time = parse_time(time_str)
     conn = sqlite3.connect(DB_PATH, timeout=20)
     cursor = conn.cursor()
@@ -78,7 +80,6 @@ def add_reminder(text, time_str):
     return f"Reminder successfully set for {parsed_time}: '{text}'"
 
 def list_reminders():
-    init_db()
     conn = sqlite3.connect(DB_PATH, timeout=20)
     cursor = conn.cursor()
     cursor.execute(
@@ -96,7 +97,6 @@ def list_reminders():
     return res.strip()
 
 def delete_reminder(reminder_id):
-    init_db()
     conn = sqlite3.connect(DB_PATH, timeout=20)
     cursor = conn.cursor()
     cursor.execute("SELECT text FROM reminders WHERE id = ?", (reminder_id,))
@@ -112,7 +112,6 @@ def delete_reminder(reminder_id):
 def check_reminders_loop():
     while True:
         try:
-            init_db()
             conn = sqlite3.connect(DB_PATH, timeout=20)
             cursor = conn.cursor()
             now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
