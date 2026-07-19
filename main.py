@@ -153,7 +153,12 @@ def FirstThread():
     while True:
         CurrentStatus = GetMicrophoneStatus()
         if CurrentStatus == "True":
-            MainExecution()
+            try:
+                MainExecution()
+            except Exception as e:
+                print(f"Error in MainExecution: {e}")
+                SetAssistantStatus("Error, listening again...")
+                sleep(1)
         else:
             AIStatus = GetAssistantStatus()
 

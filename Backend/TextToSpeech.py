@@ -1,4 +1,5 @@
-import pygame#Import pygame library for handling audio playback
+import ctypes
+import time
 import random #Import random for generating random choices
 import asyncio #Import asyncio for asynchronous operations
 import edge_tts#Import edge_tts for text-to-speech functionality
@@ -27,18 +28,28 @@ def TTS(Text, func=lambda r=None: True):
             #Convert text to an audio file asynchronously 
             asyncio.run(TextToAudioFile(Text))
 
-            #Initialize pygame mixer for audio playback 
-            pygame.mixer.init()
-
-            #Load the generated speech file into pygame mixer 
-            pygame.mixer.music.load(r"Data\speech.mp3")
-            pygame.mixer.music.play() #Play the audio
+            # Use Windows Media Control Interface (MCI) via ctypes to play MP3
+            mciSendString = ctypes.windll.winmm.mciSendStringW
+            
+            # Close the alias first in case it was left open
+            mciSendString('close my_mp3', None, 0, 0)
+            
+            file_path = os.path.abspath(r"Data\speech.mp3")
+            open_cmd = f'open "{file_path}" type mpegvideo alias my_mp3'
+            if mciSendString(open_cmd, None, 0, 0) != 0:
+                raise Exception("Failed to open audio file via MCI")
+                
+            mciSendString('play my_mp3', None, 0, 0)
 
             #Loop until the audio is done playing or the function stops 
-            while pygame.mixer.music.get_busy():
+            buffer = ctypes.create_unicode_buffer(128)
+            while True:
+                mciSendString('status my_mp3 mode', buffer, 128, 0)
+                if buffer.value != 'playing':
+                    break
                 if func() == False:#Check if the external function returns False
                     break
-                pygame.time.Clock().tick(10) 
+                time.sleep(0.1)
 
             return True #Return True if the audio played successfully
         
@@ -49,8 +60,8 @@ def TTS(Text, func=lambda r=None: True):
             try:
                 #Call the provided function with False to signal the end of TTS
                 func(False)
-                pygame.mixer.music.stop()
-                pygame.mixer.quit() #Stop the audio playback Quit the pygamo mixer
+                ctypes.windll.winmm.mciSendStringW('stop my_mp3', None, 0, 0)
+                ctypes.windll.winmm.mciSendStringW('close my_mp3', None, 0, 0)
             except Exception as e:#Handle any exceptions during cleanup
                 print(f"Error in finally block: {e}")
 

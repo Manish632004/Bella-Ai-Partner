@@ -62,7 +62,7 @@ def Content(Topic):
         messages.append({"role": "user", "content": f"{prompt}"}) # Add the user's prompt to messages.
 
         completion = client.chat.completions.create(
-            model="mixtral-8-76-32768", #Specify the Al model.
+            model="llama-3.3-70b-versatile", #Specify the Al model.
             messages= SystemChatBot + messages , # Include system instructions and chat history.
             max_tokens = 2048, # Limit the maximum tokens in the response. 
             temperature = 0.7, #Adjust response randomness.
@@ -117,7 +117,16 @@ def OpenApp(app, sess=requests.session()):
             if html is None:
                 return []
             soup = BeautifulSoup(html, 'html.parser') # Parse the HTML content.
-            links  = soup.find_all('a', {'jsname': 'UWckNb'}) # Find relevant links.
+            links = soup.find_all('a', {'jsname': 'UWckNb'}) # Find relevant links.
+            if not links:
+                for a in soup.find_all('a'):
+                    if a.find('h3') and a.get('href'):
+                        links.append(a)
+            if not links:
+                for a in soup.find_all('a'):
+                    href = a.get('href')
+                    if href and href.startswith('http') and 'google.com' not in href:
+                        links.append(a)
             return [link.get('href') for link in links]  #Return the links.
 
         #Nested function to perform a Google search and retrieve HTML.
@@ -137,8 +146,11 @@ def OpenApp(app, sess=requests.session()):
         html = search_google(app) #Perform the Google search.
 
         if html:
-            link = extract_links(html)[0] #Extract the first link from the search results.
-            webopen(link) # Open the link in a web browser.
+            links = extract_links(html)
+            if links:
+                webopen(links[0]) # Open the link in a web browser.
+            else:
+                webopen(f"https://www.google.com/search?q={app}") # Open search directly on failure.
 
         return True #Indicate success.
 # OpenApp("facebook")
@@ -192,46 +204,46 @@ async def TranslateAndExecute(commands: list[str]):
 
     for command in commands:
 
-        if command.startswith("open"): #Handle "open" commands.
+        if command == "open" or command.startswith("open "): #Handle "open" commands.
 
             if "open it" in command:  #Ignore "open it" commands.
                 pass
 
-            if "open file" ==command: #Ignore open file" commands.
+            elif "open file" == command: #Ignore open file" commands.
                 pass
 
             else:
-                fun = asyncio.to_thread(OpenApp, command.removeprefix("open ")) # Schedule app opening.
+                fun = asyncio.to_thread(OpenApp, command.removeprefix("open").strip()) # Schedule app opening.
                 funcs.append(fun)
 
-        elif command.startswith("general "):#Placeholder for general commands.
+        elif command == "general" or command.startswith("general "):#Placeholder for general commands.
             pass
         
-        elif command.startswith("realtime "):   #Placeholder for real-time commands.
+        elif command == "realtime" or command.startswith("realtime "):   #Placeholder for real-time commands.
             pass
 
-        elif command.startswith("close "): #Handle "close" commands.
-            fun = asyncio.to_thread(CloseApp, command.removeprefix("close ")) # Schedule app closing. 
+        elif command == "close" or command.startswith("close "): #Handle "close" commands.
+            fun = asyncio.to_thread(CloseApp, command.removeprefix("close").strip()) # Schedule app closing. 
             funcs.append(fun)
 
-        elif command.startswith("play "):  #Handle "play" commands.
-            fun = asyncio.to_thread(PlayYoutube, command.removeprefix("play ")) # Schedule YouTube video playing.
+        elif command == "play" or command.startswith("play "):  #Handle "play" commands.
+            fun = asyncio.to_thread(PlayYoutube, command.removeprefix("play").strip()) # Schedule YouTube video playing.
             funcs.append(fun)
 
-        elif command.startswith("content "):  #Handle "play" commands.
-                    fun = asyncio.to_thread(Content, command.removeprefix("content ")) # Schedule content creation.
-                    funcs.append(fun)
-
-        elif command.startswith("google search "): #Handle Google search commands.
-            fun =asyncio.to_thread(GoogleSearch, command.removeprefix("google search ")) # Schedule Google search.
+        elif command == "content" or command.startswith("content "):  #Handle "content" commands.
+            fun = asyncio.to_thread(Content, command.removeprefix("content").strip()) # Schedule content creation.
             funcs.append(fun)
 
-        elif command.startswith("youtube search"): #Handle YouTube search commands.
-            fun =asyncio.to_thread(YouTubeSearch, command.removeprefix("youtube search ")) #Schedule YouTube search.
+        elif command == "google search" or command.startswith("google search "): #Handle Google search commands.
+            fun = asyncio.to_thread(GoogleSearch, command.removeprefix("google search").strip()) # Schedule Google search.
             funcs.append(fun)
 
-        elif command.startswith("system "): # Handle system commands.
-            fun= asyncio.to_thread(System, command.removeprefix("system "))#Schedule system command.
+        elif command == "youtube search" or command.startswith("youtube search "): #Handle YouTube search commands.
+            fun = asyncio.to_thread(YouTubeSearch, command.removeprefix("youtube search").strip()) #Schedule YouTube search.
+            funcs.append(fun)
+
+        elif command == "system" or command.startswith("system "): # Handle system commands.
+            fun = asyncio.to_thread(System, command.removeprefix("system").strip())#Schedule system command.
             funcs.append(fun)
 
         else:
